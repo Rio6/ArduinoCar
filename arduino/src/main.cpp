@@ -13,8 +13,6 @@ void setup() {
     pinMode(pinRB,OUTPUT);
     pinMode(pinRF,OUTPUT);
 
-    Serial.print("Hello");
-
 }
 
 void loop() {
