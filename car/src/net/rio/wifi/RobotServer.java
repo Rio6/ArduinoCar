@@ -1,3 +1,8 @@
+/*
+ * Author: Rio
+ * Date: 2017/02/21
+ */
+
 package net.rio.wifi;
 
 import android.util.Log;
