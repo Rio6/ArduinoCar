@@ -9,20 +9,22 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         >
-        <Button android:id="@+id/disc_button"
-            android:layout_height="wrap_content"
-            android:layout_width="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/disc" />
         <Button android:id="@+id/conn_button"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_width="wrap_content"
             android:layout_weight="1"
             android:text="@string/conn" />
+        <Button android:id="@+id/dconn_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/dconn" />
     </LinearLayout>
+    <Spinner android:id="@+id/peer_spinner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
     <TextView android:id="@+id/info_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="1" />
 </LinearLayout>
-

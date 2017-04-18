@@ -3,7 +3,6 @@
     <string name="app_name">Robot</string>
     <string name="scan">Scan</string>
     <string name="perm">Request Permission</string>
-    <string name="request">Request Information</string>
     <string name="create_group">Create Group</string>
     <string name="remove_group">Remove Group</string>
 </resources>

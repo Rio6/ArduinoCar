@@ -1,22 +1,22 @@
 /*
  * Author: Rio
- * Date: 2017/02/21
+ * Date: 2017/03/11
  */
 
 package net.rio.wifi;
 
 import android.app.Activity;
-import android.content.*;
+import android.content.Context;
 import android.os.Looper;
-import android.net.wifi.p2p.*;
+import android.net.wifi.p2p.*; // WifiP2pManager, WifiP2pInfo, WifiP2pGroup, WifiP2pDeviceList, WifiP2pDevice
 import android.net.wifi.p2p.WifiP2pManager.*;
 import android.util.Log;
-import java.util.HashMap;
+import java.util.*; // List ArrayList HashMap
 
 import net.rio.car.AppEventListener;
 import net.rio.car.MainActivity;
 
-public class WifiP2pController implements ConnectionInfoListener, GroupInfoListener {
+public class WifiP2pController implements ConnectionInfoListener, GroupInfoListener, PeerListListener {
 
     private AppEventListener eventListener;
     private WifiP2pManager manager;
@@ -32,13 +32,14 @@ public class WifiP2pController implements ConnectionInfoListener, GroupInfoListe
     public void requestInfo() {
         manager.requestConnectionInfo(channel, this);
         manager.requestGroupInfo(channel, this);
+        manager.requestPeers(channel, this);
     }
 
     public void createGroup() {
         manager.createGroup(channel, new ActionListener() {
             @Override
             public void onSuccess() {
-                Log.d(MainActivity.TAG, "Creating group success");
+                Log.i(MainActivity.TAG, "Creating group success");
             }
             @Override
             public void onFailure(int err) {
@@ -51,7 +52,7 @@ public class WifiP2pController implements ConnectionInfoListener, GroupInfoListe
         manager.removeGroup(channel, new ActionListener() {
             @Override
             public void onSuccess() {
-                Log.d(MainActivity.TAG, "Removing group success");
+                Log.i(MainActivity.TAG, "Removing group success");
             }
             @Override
             public void onFailure(int err) {
@@ -80,6 +81,17 @@ public class WifiP2pController implements ConnectionInfoListener, GroupInfoListe
                 infoMap.clear();
             }
             eventListener.onInfoChanged(infoMap);
+        }
+    }
+
+    @Override
+    public void onPeersAvailable(WifiP2pDeviceList deviceList) {
+        if(eventListener != null) {
+            List deviceNames = new ArrayList<>();
+            for(WifiP2pDevice e : deviceList.getDeviceList()) {
+                deviceNames.add(e.deviceName);
+            }
+            eventListener.onPeerChanged(deviceNames);
         }
     }
 

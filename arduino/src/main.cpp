@@ -7,7 +7,8 @@ int pinRF=16;
 int pinRB=17;
 
 void setup() {
-    Serial.begin(9600);     // 定義馬達輸出腳位 
+    Serial.begin(9600);
+    // 定義馬達輸出腳位 
     pinMode(pinLB,OUTPUT);
     pinMode(pinLF,OUTPUT);
     pinMode(pinRB,OUTPUT);

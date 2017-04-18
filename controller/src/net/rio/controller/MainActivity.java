@@ -5,19 +5,26 @@
 
 package net.rio.controller;
 
+import net.rio.wifi.WifiP2pController;
+
 import android.app.Activity;
 import android.content.IntentFilter;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.*;
+import android.widget.*; // Button, Spinner, TextView
 
-public class MainActivity extends Activity {
+import java.util.*; // List, Map, HashMap
+
+public class MainActivity extends Activity implements AppEventListener {
 
     public static String TAG = "RobotControl";
 
-    private IntentFilter intentFilter;
+    private ArrayAdapter<String> peerAdpt;
     private TextView infoText;
+    private Spinner peerSpnr;
+
+    private Receiver receiver;
     private WifiP2pController controller;
 
     /** Called when the activity is first created. */
@@ -26,30 +33,44 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
 
-        intentFilter = new IntentFilter();
-        intentFilter.addAction(WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION);
-        intentFilter.addAction(WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION);
-        intentFilter.addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION);
-        intentFilter.addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION);
+        controller = new WifiP2pController(this, this);
+        receiver = new Receiver(controller);
 
-        controller = new WifiP2pController(this);
         infoText = (TextView) findViewById(R.id.info_text);
 
-        // Buttons
-        Button discBtn = (Button) findViewById(R.id.disc_button);
-        discBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                infoText.setText("" + controller.getPeerList().toString());
-            }
-        });
-
+        // Setup button
         Button connBtn = (Button) findViewById(R.id.conn_button);
         connBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 controller.connect();
             }
+        });
+
+        Button dconnBtn = (Button) findViewById(R.id.dconn_button);
+        dconnBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                controller.disconnect();
+            }
+        });
+
+        // Setup adapter
+        peerAdpt = new ArrayAdapter(this, android.R.layout.simple_spinner_item);
+        peerAdpt.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        peerAdpt.setNotifyOnChange(true);
+
+        // Setup spinner
+        peerSpnr = (Spinner) findViewById(R.id.peer_spinner);
+        peerSpnr.setAdapter(peerAdpt);
+        peerSpnr.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view,
+                    int pos, long id) {
+                controller.selectPeer((String) parent.getItemAtPosition(pos));
+            }
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {}
         });
 
         // Don't let screen go black
@@ -59,12 +80,29 @@ public class MainActivity extends Activity {
     @Override
     public void onStart() {
         super.onStart();
-        registerReceiver(controller.getReceiver(), intentFilter);
+        registerReceiver(receiver, receiver.getFilter());
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        unregisterReceiver(controller.getReceiver());
+        unregisterReceiver(receiver);
+    }
+
+    @Override
+    public void onPeerChanged(List<String> peerNames) {
+        peerAdpt.clear();
+        peerAdpt.addAll(peerNames);
+    }
+
+    @Override
+    public void onInfoChanged(HashMap<String, String> infoMap) {
+        String info = "";
+
+        for(Map.Entry<String, String> e : infoMap.entrySet()) {
+            info += e.getKey() + ": " + e.getValue() + "\n";
+        }
+
+        infoText.setText(info);
     }
 }

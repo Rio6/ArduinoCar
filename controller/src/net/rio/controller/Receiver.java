@@ -5,24 +5,27 @@
 
 package net.rio.controller;
 
+import net.rio.wifi.WifiP2pController;
+
 import android.content.*;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.util.Log;
 import android.widget.Toast;
 
-public class Receiver extends BroadcastReceiver {
+class Receiver extends BroadcastReceiver {
 
     private IntentFilter filter;
-    private UsbController uController;
+    private WifiP2pController controller;
 
-    Receiver() {
+    Receiver(WifiP2pController controller) {
+
+        this.controller = controller;
 
         filter = new IntentFilter();
 
         filter.addAction(WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION);
         filter.addAction(WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION);
         filter.addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION);
-        filter.addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION);
     }
 
     IntentFilter getFilter() {
@@ -33,18 +36,25 @@ public class Receiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         String action = intent.getAction();
 
-        if(WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION.equals(action)) {
+        switch(action) {
+            case WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION:
 
-            int state = intent.getIntExtra(WifiP2pManager.EXTRA_WIFI_STATE, -1);
-            String msg;
+                int state = intent.getIntExtra(WifiP2pManager.EXTRA_WIFI_STATE, -1);
+                String msg;
 
-            if(state == WifiP2pManager.WIFI_P2P_STATE_ENABLED){
-                msg = "Wifi direct is enabled";
-            } else {
-                msg = "Wifi direct is disabled";
-            }
-            Log.i(MainActivity.TAG, msg);
-            Toast.makeText(context, msg, Toast.LENGTH_SHORT).show();
+                if(state == WifiP2pManager.WIFI_P2P_STATE_ENABLED){
+                    msg = "Wifi direct is enabled";
+                } else {
+                    msg = "Wifi direct is disabled";
+                }
+                Log.i(MainActivity.TAG, msg);
+                Toast.makeText(context, msg, Toast.LENGTH_SHORT).show();
+
+                break;
+            case WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION:
+            case WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION:
+                controller.requestInfo();
+                break;
         }
     }
 }

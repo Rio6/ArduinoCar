@@ -1,6 +1,6 @@
 /*
  * Author: Rio
- * Date: 2017/02/21
+ * Date: 2017/03/11
  */
 
 package net.rio.car;
@@ -29,6 +29,9 @@ public class MainActivity extends Activity implements AppEventListener {
     private Spinner deviceSpnr;
     private TextView infoText;
 
+    private HashMap<String, String> infoMap;
+    private List<String> peerNames;
+
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -38,7 +41,7 @@ public class MainActivity extends Activity implements AppEventListener {
         // Declare variables
         uController = new UsbController(this);
         wController = new WifiP2pController(this, this);
-        receiver = new Receiver(uController);
+        receiver = new Receiver(uController, wController);
         server = new RobotServer(uController);
 
         // Setup textview
@@ -81,14 +84,6 @@ public class MainActivity extends Activity implements AppEventListener {
             }
         });
 
-        Button requestBtn = (Button) findViewById(R.id.request_button);
-        requestBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                wController.requestInfo();
-            }
-        });
-
         Button createGroupBtn = (Button) findViewById(R.id.create_group_button);
         createGroupBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -110,16 +105,16 @@ public class MainActivity extends Activity implements AppEventListener {
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
+    public void onResume() {
+        super.onResume();
         registerReceiver(receiver, receiver.getFilter());
         uController.startConnection();
         server.startServer();
     }
 
     @Override
-    public void onStop() {
-        super.onStop();
+    public void onPause() {
+        super.onPause();
         unregisterReceiver(receiver);
         server.stopServer();
     }
@@ -133,13 +128,31 @@ public class MainActivity extends Activity implements AppEventListener {
 
     @Override
     public void onInfoChanged(HashMap<String, String> infoMap) {
-        updateInfo(infoMap);
+        this.infoMap = infoMap;
+        updateInfo();
     }
 
-    private void updateInfo(HashMap<String, String> infoMap) {
+    @Override
+    public void onPeerChanged(List<String> peerNames) {
+        this.peerNames = peerNames;
+        updateInfo();
+    }
+
+    private void updateInfo() {
         String info = "";
-        for(Map.Entry<String, String> e : infoMap.entrySet()) {
-            info += e.getKey() + ": " + e.getValue() + "\n";
+
+        if(infoMap != null) {
+            for(Map.Entry<String, String> e : infoMap.entrySet()) {
+                info += e.getKey() + ": " + e.getValue() + "\n";
+            }
+        }
+
+        info += "\n";
+
+        if(peerNames != null) {
+            for(String e : peerNames) {
+                info += e + "\n";
+            }
         }
         infoText.setText(info);
     }

@@ -5,23 +5,27 @@
 
 package net.rio.wifi;
 
+import net.rio.controller.AppEventListener;
+import net.rio.controller.MainActivity;
+
 import android.app.Activity;
-import android.net.wifi.p2p.*;
+import android.content.Context;
+import android.net.wifi.p2p.*; // WifiP2pManager, WifiP2pDevice, WifiP2pConfig, WifiP2pDeviceList, WifiP2pInfo
 import android.net.wifi.p2p.WifiP2pManager.*;
 import android.os.Looper;
 import android.util.Log;
-import java.util.*;
+import java.util.*; // Hashmap, ArrayList, List
 
-class WifiP2pController implements PeerListListener, ConnectionInfoListener {
+public class WifiP2pController implements PeerListListener, ConnectionInfoListener {
 
     private WifiP2pManager manager;
     private Channel channel;
 
     private WifiP2pDevice peer;
-    private HashMap<String, WifiP2pDevice> peers = new ArrayList<WifiP2pDevice>();
+    private HashMap<String, WifiP2pDevice> peers = new HashMap<>();
     private AppEventListener eventListener;
 
-    WifiP2pController(Activity activity, AppEventListener eventListener) {
+    public WifiP2pController(Activity activity, AppEventListener eventListener) {
 
         this.eventListener = eventListener;
 
@@ -36,26 +40,19 @@ class WifiP2pController implements PeerListListener, ConnectionInfoListener {
             }
             @Override
             public void onFailure(int err) {
-                Log.e(MainActivity.TAG, "Discover failed");
-                switch(err) {
-                    case WifiP2pManager.P2P_UNSUPPORTED:
-                        Log.e(MainActivity.TAG, "Wifi direct is not supported");
-                        break; 
-                    case WifiP2pManager.BUSY:
-                        Log.e(MainActivity.TAG, "Device or resource is busy");
-                        break;
-                    case WifiP2pManager.ERROR:
-                        Log.e(MainActivity.TAG, "An error occured");
-                        break;
-                }
+                perror("Discover failed", err);
             }
         });
     }
 
-    void connect() {
-        if(peers.size() > 0) {
+    public void selectPeer(String peerName) {
+        peer = peers.get(peerName);
+    }
+
+    public void connect() {
+        if(peer != null) {
             WifiP2pConfig config = new WifiP2pConfig();
-            config.deviceAddress = peers.get(0).deviceAddress;
+            config.deviceAddress = peer.deviceAddress;
             manager.connect(channel, config, new ActionListener() {
                 @Override
                 public void onSuccess() {
@@ -68,6 +65,33 @@ class WifiP2pController implements PeerListListener, ConnectionInfoListener {
             });
         }
     }
+    
+    public void disconnect() {
+        manager.removeGroup(channel, new ActionListener() {
+            @Override
+            public void onSuccess() {
+                Log.d(MainActivity.TAG, "Disconnect success");
+            }
+            public void onFailure(int err) {
+                perror("Disconnect failed", err);
+            }
+        });
+    }
+
+    public void requestInfo() {
+        manager.requestConnectionInfo(channel, this);
+        manager.requestPeers(channel, this);
+    }
+
+    @Override
+    public void onConnectionInfoAvailable(WifiP2pInfo info) {
+        if(eventListener != null) {
+            HashMap<String, String> infoMap = new HashMap<>();
+            infoMap.put("Owner address", info.groupOwnerAddress != null ? info.groupOwnerAddress.getHostAddress() : "");
+
+            eventListener.onInfoChanged(infoMap);
+        }
+    }
 
     @Override
     public void onPeersAvailable(WifiP2pDeviceList peerList) {
@@ -75,15 +99,13 @@ class WifiP2pController implements PeerListListener, ConnectionInfoListener {
         for(WifiP2pDevice device : peerList.getDeviceList()) {
             peers.put(device.deviceName, device);
         }
-        eventListener.onPeerChanged(new ArrayList<String>(peers.keySet()));
-        Log.d(MainActivity.TAG, "I got " + peers.size() + " peers");
+
+        if(eventListener != null) {
+            eventListener.onPeerChanged(new ArrayList<String>(peers.keySet()));
+        }
     }
 
-    @Override
-    public void onConnectionInfoAvailable(WifiP2pInfo info) {
-    }
-
-    private perror(String msg, int err) {
+    private void perror(String msg, int err) {
         switch(err) {
             case WifiP2pManager.P2P_UNSUPPORTED:
                 Log.e(MainActivity.TAG, msg + ": Wifi direct is not supported");
