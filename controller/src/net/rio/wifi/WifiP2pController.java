@@ -35,6 +35,10 @@ public class WifiP2pController implements PeerListListener, ConnectionInfoListen
         channel = manager.initialize(activity, Looper.getMainLooper(), null);
 
         // Start for discovering peers
+        discoverPeers();
+    }
+
+    public void discoverPeers() {
         manager.discoverPeers(channel, new ActionListener() {
             @Override
             public void onSuccess() {

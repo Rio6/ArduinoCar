@@ -53,6 +53,7 @@ class Receiver extends BroadcastReceiver {
                 break;
             case WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION:
             case WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION:
+                controller.discoverPeers();
                 controller.requestInfo();
                 break;
         }
