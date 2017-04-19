@@ -9,6 +9,17 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         >
+        <Button android:id="@+id/conn_p2p_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/conn_p2p" />
+    </LinearLayout>
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        >
         <Button android:id="@+id/conn_button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

@@ -5,6 +5,7 @@
 
 package net.rio.controller;
 
+import net.rio.wifi.RobotClient;
 import net.rio.wifi.WifiP2pController;
 
 import android.app.Activity;
@@ -26,6 +27,9 @@ public class MainActivity extends Activity implements AppEventListener {
 
     private Receiver receiver;
     private WifiP2pController controller;
+    private RobotClient robotClient;
+
+    private String hostAddr;
 
     /** Called when the activity is first created. */
     @Override
@@ -35,15 +39,24 @@ public class MainActivity extends Activity implements AppEventListener {
 
         controller = new WifiP2pController(this, this);
         receiver = new Receiver(controller);
+        robotClient = new RobotClient();
 
         infoText = (TextView) findViewById(R.id.info_text);
 
         // Setup button
+        Button connP2pBtn = (Button) findViewById(R.id.conn_p2p_button);
+        connP2pBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                controller.connect();
+            }
+        });
+
         Button connBtn = (Button) findViewById(R.id.conn_button);
         connBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                controller.connect();
+                robotClient.connect(hostAddr);
             }
         });
 
@@ -51,7 +64,7 @@ public class MainActivity extends Activity implements AppEventListener {
         dconnBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                controller.disconnect();
+                robotClient.disconnect();
             }
         });
 
@@ -101,6 +114,8 @@ public class MainActivity extends Activity implements AppEventListener {
 
         for(Map.Entry<String, String> e : infoMap.entrySet()) {
             info += e.getKey() + ": " + e.getValue() + "\n";
+
+            if(e.getKey().equals("Owner address")) hostAddr = e.getValue();
         }
 
         infoText.setText(info);

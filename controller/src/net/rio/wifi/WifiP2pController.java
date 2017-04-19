@@ -25,6 +25,8 @@ public class WifiP2pController implements PeerListListener, ConnectionInfoListen
     private HashMap<String, WifiP2pDevice> peers = new HashMap<>();
     private AppEventListener eventListener;
 
+    private String host;
+
     public WifiP2pController(Activity activity, AppEventListener eventListener) {
 
         this.eventListener = eventListener;
@@ -65,22 +67,14 @@ public class WifiP2pController implements PeerListListener, ConnectionInfoListen
             });
         }
     }
-    
-    public void disconnect() {
-        manager.removeGroup(channel, new ActionListener() {
-            @Override
-            public void onSuccess() {
-                Log.d(MainActivity.TAG, "Disconnect success");
-            }
-            public void onFailure(int err) {
-                perror("Disconnect failed", err);
-            }
-        });
-    }
 
     public void requestInfo() {
         manager.requestConnectionInfo(channel, this);
         manager.requestPeers(channel, this);
+    }
+
+    public String getHostAddr() {
+        return host;
     }
 
     @Override
