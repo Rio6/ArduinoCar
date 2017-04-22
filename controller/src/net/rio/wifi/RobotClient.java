@@ -6,8 +6,8 @@
 package net.rio.wifi;
 
 import android.util.Log;
-import java.io.*;
-import java.net.*;
+import java.io.*; // IOException, DataOutputStream
+import java.net.*; // Socket
 
 import net.rio.controller.MainActivity;
 
