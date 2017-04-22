@@ -6,8 +6,8 @@
 package net.rio.wifi;
 
 import android.util.Log;
-import java.io.*;
-import java.net.*;
+import java.io.*; // IOException, DataInputStream
+import java.net.*; // ServerSocket, Socket, BindException
 
 import net.rio.car.MainActivity;
 import net.rio.usb.UsbController;
