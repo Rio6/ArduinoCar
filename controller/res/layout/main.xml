@@ -9,11 +9,40 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         >
-        <Button android:id="@+id/conn_p2p_button"
-            android:layout_width="match_parent"
+        <Button android:id="@+id/w_button"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
+            android:text="@string/forward" />
+        <Button android:id="@+id/s_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/back" />
+        <Button android:id="@+id/a_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/left" />
+        <Button android:id="@+id/d_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/right" />
+        <Button android:id="@+id/spc_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/stop" />
+    </LinearLayout>
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        >
+        <Button android:id="@+id/conn_p2p_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:text="@string/conn_p2p" />
+        <Button android:id="@+id/dconn_p2p_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/dconn_p2p" />
     </LinearLayout>
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:orientation="horizontal"
@@ -21,12 +50,12 @@
         android:layout_height="wrap_content"
         >
         <Button android:id="@+id/conn_button"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="@string/conn" />
         <Button android:id="@+id/dconn_button"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="@string/dconn" />

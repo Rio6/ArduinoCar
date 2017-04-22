@@ -25,8 +25,6 @@ public class WifiP2pController implements PeerListListener, ConnectionInfoListen
     private HashMap<String, WifiP2pDevice> peers = new HashMap<>();
     private AppEventListener eventListener;
 
-    private String host;
-
     public WifiP2pController(Activity activity, AppEventListener eventListener) {
 
         this.eventListener = eventListener;
@@ -76,9 +74,17 @@ public class WifiP2pController implements PeerListListener, ConnectionInfoListen
         manager.requestConnectionInfo(channel, this);
         manager.requestPeers(channel, this);
     }
-
-    public String getHostAddr() {
-        return host;
+   
+    public void disconnect() {
+        manager.removeGroup(channel, new ActionListener() {
+            @Override
+            public void onSuccess() {
+                Log.d(MainActivity.TAG, "Disconnect success");
+            }
+            public void onFailure(int err) {
+                perror("Disconnect failed", err);
+            }
+        });
     }
 
     @Override
@@ -86,6 +92,8 @@ public class WifiP2pController implements PeerListListener, ConnectionInfoListen
         if(eventListener != null) {
             HashMap<String, String> infoMap = new HashMap<>();
             infoMap.put("Owner address", info.groupOwnerAddress != null ? info.groupOwnerAddress.getHostAddress() : "");
+            if(peer != null)
+                infoMap.put("Current device", peer.deviceName);
 
             eventListener.onInfoChanged(infoMap);
         }
@@ -97,6 +105,8 @@ public class WifiP2pController implements PeerListListener, ConnectionInfoListen
         for(WifiP2pDevice device : peerList.getDeviceList()) {
             peers.put(device.deviceName, device);
         }
+
+        if(!peers.containsValue(peer)) peer = null;
 
         if(eventListener != null) {
             eventListener.onPeerChanged(new ArrayList<String>(peers.keySet()));

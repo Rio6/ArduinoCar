@@ -1,6 +1,6 @@
 /*
  * Author: Rio
- * Date: 2017/02/25
+ * Date: 2017/04/21
  */
 
 package net.rio.controller;
@@ -52,6 +52,14 @@ public class MainActivity extends Activity implements AppEventListener {
             }
         });
 
+        Button dconnP2pBtn = (Button) findViewById(R.id.dconn_p2p_button);
+        dconnP2pBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                controller.disconnect();
+            }
+        });
+
         Button connBtn = (Button) findViewById(R.id.conn_button);
         connBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -65,6 +73,46 @@ public class MainActivity extends Activity implements AppEventListener {
             @Override
             public void onClick(View view) {
                 robotClient.disconnect();
+            }
+        });
+
+        Button wBtn = (Button) findViewById(R.id.w_button);
+        wBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                robotClient.send(new byte[]{'w'});
+            }
+        });
+
+        Button sBtn = (Button) findViewById(R.id.s_button);
+        sBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                robotClient.send(new byte[]{'s'});
+            }
+        });
+
+        Button aBtn = (Button) findViewById(R.id.a_button);
+        aBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                robotClient.send(new byte[]{'a'});
+            }
+        });
+
+        Button dBtn = (Button) findViewById(R.id.d_button);
+        dBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                robotClient.send(new byte[]{'d'});
+            }
+        });
+
+        Button spcBtn = (Button) findViewById(R.id.spc_button);
+        spcBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                robotClient.send(new byte[]{' '});
             }
         });
 
