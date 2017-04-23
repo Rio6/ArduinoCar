@@ -1,54 +1,96 @@
 #include <Arduino.h>
-#include <Servo.h> 
+#include "AFMotor.h"
 
-int pinLF=14;
-int pinLB=15;
-int pinRF=16;
-int pinRB=17;
+typedef enum {
+    NONE,
+    MOTOR,
+    SERVO
+} ParseType;
+
+struct {
+    ParseType type;
+    int mSpeed;
+    int mCmd;
+    int sAngle;
+    int index;
+} parser;
+
+AF_DCMotor motors[] = {
+    AF_DCMotor(1),
+    AF_DCMotor(2),
+    AF_DCMotor(3),
+    AF_DCMotor(4)};
+int motorNum = 4;
+
+void run() {
+    if(parser.index < 0) return;
+    if(parser.type == NONE) return;
+
+    Serial.println("Running");
+    switch(parser.type) {
+        case MOTOR:
+            if(parser.index < motorNum) {
+                AF_DCMotor motor = motors[parser.index];
+                if(parser.mCmd >= 0)
+                    motor.run(parser.mCmd);
+                if(parser.mSpeed >= 0)
+                    motor.setSpeed(parser.mSpeed);
+            }
+            break;
+        case SERVO:
+            // Ignore servo for now
+            break;
+        case NONE:
+            break;
+    }
+}
 
 void setup() {
     Serial.begin(9600);
-    // 定義馬達輸出腳位 
-    pinMode(pinLB,OUTPUT);
-    pinMode(pinLF,OUTPUT);
-    pinMode(pinRB,OUTPUT);
-    pinMode(pinRF,OUTPUT);
-
+    parser.type = NONE;
+    parser.mSpeed = parser.mCmd = parser.sAngle = parser.index = -1;
 }
 
 void loop() {
-    if(Serial.available()) {
+    if(Serial.available() > 0) {
         int val = Serial.read();
-        if(val == 'w') { // forward
-            digitalWrite(pinRF,HIGH);
-            digitalWrite(pinRB,LOW);
-            digitalWrite(pinLF,HIGH);
-            digitalWrite(pinLB,LOW);
+        Serial.write(val); // For debug
+
+        if(val == '>') {
+            parser.type = NONE;
+            parser.mSpeed = parser.mCmd = parser.sAngle = parser.index = -1;
+        } else if(val == '<') {
+            run();
+        } else {
+            if(parser.type == NONE) {
+                switch(val) {
+                    case 'M':
+                        parser.type = MOTOR;
+                        break;
+                    case 'S':
+                        parser.type = SERVO;
+                        break;
+                }
+            } else {
+                if(parser.index < 0) {
+                    parser.index = val;
+                } else {
+                    switch(parser.type) {
+                        case MOTOR:
+                            if(parser.mSpeed < 0)
+                                parser.mSpeed = val & 0xff;
+                            else if(parser.mCmd < 0)
+                                parser.mCmd = val;
+                            break;
+                        case SERVO:
+                            if(parser.sAngle < 0)
+                                parser.sAngle = val;
+                            break;
+                        case NONE:
+                            break;
+                    }
+                }
+            }
         }
-        if(val == 's') { // back
-            digitalWrite(pinRF,LOW);
-            digitalWrite(pinRB,HIGH);
-            digitalWrite(pinLF,LOW);
-            digitalWrite(pinLB,HIGH);
-        }
-        if(val == 'a') { // left
-            digitalWrite(pinRF,HIGH);
-            digitalWrite(pinRB,LOW);
-            digitalWrite(pinLF,LOW);
-            digitalWrite(pinLB,HIGH);
-        }
-        if(val == 'd') { // right
-            digitalWrite(pinRF,LOW);
-            digitalWrite(pinRB,HIGH);
-            digitalWrite(pinLF,HIGH);
-            digitalWrite(pinLB,LOW);
-        }
-        if(val == ' ') { // stop
-            digitalWrite(pinRF,LOW);
-            digitalWrite(pinRB,LOW);
-            digitalWrite(pinLF,LOW);
-            digitalWrite(pinLB,LOW);
-        }
-        Serial.write(val);
     }
 }
