@@ -8,8 +8,10 @@ package net.rio.wifi;
 import android.util.Log;
 import java.io.*; // IOException, DataInputStream
 import java.net.*; // ServerSocket, Socket, BindException
+import java.util.HashMap;
 
 import net.rio.car.MainActivity;
+import net.rio.car.AppEventListener;
 import net.rio.usb.UsbController;
 
 public class RobotServer implements Runnable {
@@ -18,13 +20,15 @@ public class RobotServer implements Runnable {
 
     private ServerSocket server;
     private UsbController usb;
+    private AppEventListener eventListener;
 
     private DataInputStream iStream;
 
     private Thread srvThread;
 
-    public RobotServer(UsbController usb) {
+    public RobotServer(UsbController usb, AppEventListener eventListener) {
         this.usb = usb;
+        this.eventListener = eventListener;
     }
 
     @Override
@@ -33,8 +37,15 @@ public class RobotServer implements Runnable {
             try(ServerSocket server = new ServerSocket(LISTEN_PORT)) {
                 this.server = server;
                 Log.i(MainActivity.TAG, "Waiting connection");
+
+                if(eventListener != null)
+                    eventListener.onClientConnected(null);
+
                 Socket client = server.accept();
                 Log.i(MainActivity.TAG, "Connection established");
+
+                if(eventListener != null)
+                    eventListener.onClientConnected(client.getRemoteSocketAddress().toString());
 
                 iStream = new DataInputStream(client.getInputStream());
 

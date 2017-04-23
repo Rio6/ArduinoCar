@@ -31,6 +31,7 @@ public class MainActivity extends Activity implements AppEventListener {
 
     private HashMap<String, String> infoMap;
     private List<String> peerNames;
+    private String clientAddr;
 
     /** Called when the activity is first created. */
     @Override
@@ -42,7 +43,7 @@ public class MainActivity extends Activity implements AppEventListener {
         uController = new UsbController(this);
         wController = new WifiP2pController(this, this);
         receiver = new Receiver(uController, wController);
-        server = new RobotServer(uController);
+        server = new RobotServer(uController, this);
 
         // Setup textview
         infoText = (TextView) findViewById(R.id.info_text);
@@ -138,22 +139,39 @@ public class MainActivity extends Activity implements AppEventListener {
         updateInfo();
     }
 
+    @Override
+    public void onClientConnected(String addr) {
+        this.clientAddr = addr;
+        updateInfo();
+    }
+
     private void updateInfo() {
-        String info = "";
 
-        if(infoMap != null) {
-            for(Map.Entry<String, String> e : infoMap.entrySet()) {
-                info += e.getKey() + ": " + e.getValue() + "\n";
+        // Might be called on other thread
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                String info = "";
+
+                if(infoMap != null) {
+                    for(Map.Entry<String, String> e : infoMap.entrySet()) {
+                        info += e.getKey() + ": " + e.getValue() + "\n";
+                    }
+                }
+
+                info += "\n";
+
+                if(peerNames != null) {
+                    for(String e : peerNames) {
+                        info += e + "\n";
+                    }
+                }
+                
+                if(clientAddr != null) 
+                    info += clientAddr + "\n";
+
+                infoText.setText(info);
             }
-        }
-
-        info += "\n";
-
-        if(peerNames != null) {
-            for(String e : peerNames) {
-                info += e + "\n";
-            }
-        }
-        infoText.setText(info);
+        });
     }
 }
