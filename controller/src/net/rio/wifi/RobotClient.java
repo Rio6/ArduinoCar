@@ -8,6 +8,8 @@ package net.rio.wifi;
 import android.util.Log;
 import java.io.*; // IOException, DataOutputStream
 import java.net.*; // Socket
+import java.util.ArrayList;
+import java.util.List;
 
 import net.rio.controller.MainActivity;
 
@@ -15,7 +17,7 @@ public class RobotClient implements Runnable {
 
     private Thread sendThread;
     private Object sendLock = new Object();
-    private byte[] cmd;
+    private List<byte[]> cmdList = new ArrayList<>();
 
     private String host;
     private final int port = 5438;
@@ -44,11 +46,14 @@ public class RobotClient implements Runnable {
                     sendLock.wait();
                 }
 
-                for(byte c : cmd) {
-                    oStream.write(c);
+                while(cmdList.size() > 0) {
+                    byte[] cmd = cmdList.remove(0);
+
+                    for(byte c : cmd) {
+                        oStream.write(c);
+                    }
                 }
                 oStream.flush();
-
             }
 
         } catch(InterruptedException e) {
@@ -81,7 +86,7 @@ public class RobotClient implements Runnable {
     }
 
     public void send(byte[] cmd) {
-        this.cmd = cmd;
+        cmdList.add(cmd);
         synchronized(sendLock) {
             sendLock.notify();
         }

@@ -80,7 +80,10 @@ public class MainActivity extends Activity implements AppEventListener {
         wBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                robotClient.send(new byte[]{'w'});
+                robotClient.send(new byte[]{'>', 'M', 0, (byte) 200, 1, '<'});
+                robotClient.send(new byte[]{'>', 'M', 1, (byte) 200, 1, '<'});
+                robotClient.send(new byte[]{'>', 'M', 2, (byte) 200, 1, '<'});
+                robotClient.send(new byte[]{'>', 'M', 3, (byte) 200, 1, '<'});
             }
         });
 
@@ -88,7 +91,10 @@ public class MainActivity extends Activity implements AppEventListener {
         sBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                robotClient.send(new byte[]{'s'});
+                robotClient.send(new byte[]{'>', 'M', 0, (byte) 200, 2, '<'});
+                robotClient.send(new byte[]{'>', 'M', 1, (byte) 200, 2, '<'});
+                robotClient.send(new byte[]{'>', 'M', 2, (byte) 200, 2, '<'});
+                robotClient.send(new byte[]{'>', 'M', 3, (byte) 200, 2, '<'});
             }
         });
 
@@ -96,7 +102,10 @@ public class MainActivity extends Activity implements AppEventListener {
         aBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                robotClient.send(new byte[]{'a'});
+                robotClient.send(new byte[]{'>', 'M', 0, (byte) 200, 2, '<'});
+                robotClient.send(new byte[]{'>', 'M', 1, (byte) 200, 2, '<'});
+                robotClient.send(new byte[]{'>', 'M', 2, (byte) 200, 1, '<'});
+                robotClient.send(new byte[]{'>', 'M', 3, (byte) 200, 1, '<'});
             }
         });
 
@@ -104,7 +113,10 @@ public class MainActivity extends Activity implements AppEventListener {
         dBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                robotClient.send(new byte[]{'d'});
+                robotClient.send(new byte[]{'>', 'M', 0, (byte) 200, 1, '<'});
+                robotClient.send(new byte[]{'>', 'M', 1, (byte) 200, 1, '<'});
+                robotClient.send(new byte[]{'>', 'M', 2, (byte) 200, 2, '<'});
+                robotClient.send(new byte[]{'>', 'M', 3, (byte) 200, 2, '<'});
             }
         });
 
@@ -112,7 +124,10 @@ public class MainActivity extends Activity implements AppEventListener {
         spcBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                robotClient.send(new byte[]{' '});
+                robotClient.send(new byte[]{'>', 'M', 0, (byte) 200, 4, '<'});
+                robotClient.send(new byte[]{'>', 'M', 1, (byte) 200, 4, '<'});
+                robotClient.send(new byte[]{'>', 'M', 2, (byte) 200, 4, '<'});
+                robotClient.send(new byte[]{'>', 'M', 3, (byte) 200, 4, '<'});
             }
         });
 
