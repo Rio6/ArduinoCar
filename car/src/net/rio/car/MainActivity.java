@@ -124,7 +124,6 @@ public class MainActivity extends Activity implements AppEventListener {
     public void onDestroy() {
         super.onDestroy();
         uController.stopConnection();
-        wController.removeGroup();
     }
 
     @Override
