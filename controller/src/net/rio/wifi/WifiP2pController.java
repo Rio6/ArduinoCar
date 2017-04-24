@@ -1,6 +1,6 @@
 /*
  * Author: Rio
- * Date: 2017/02/25
+ * Date: 2017/04/23
  */
 
 package net.rio.wifi;
@@ -76,6 +76,16 @@ public class WifiP2pController implements PeerListListener, ConnectionInfoListen
     }
    
     public void disconnect() {
+        manager.cancelConnect(channel, new ActionListener() {
+            @Override
+            public void onSuccess() {
+                Log.d(MainActivity.TAG, "Cancel connect success");
+            }
+            public void onFailure(int err) {
+                perror("Cancel connect failed", err);
+            }
+        });
+
         manager.removeGroup(channel, new ActionListener() {
             @Override
             public void onSuccess() {
