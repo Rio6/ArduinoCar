@@ -30,6 +30,8 @@ public class MainActivity extends Activity implements AppEventListener {
     private RobotClient robotClient;
 
     private String hostAddr;
+    private String connStat;
+    private HashMap<String, String> infoMap;
 
     /** Called when the activity is first created. */
     @Override
@@ -39,7 +41,8 @@ public class MainActivity extends Activity implements AppEventListener {
 
         controller = new WifiP2pController(this, this);
         receiver = new Receiver(controller);
-        robotClient = new RobotClient();
+        robotClient = new RobotClient(this);
+        connStat = "Not connected";
 
         infoText = (TextView) findViewById(R.id.info_text);
 
@@ -166,6 +169,12 @@ public class MainActivity extends Activity implements AppEventListener {
     }
 
     @Override
+    public void onConnectionChanged(String status) {
+        connStat = status;
+        updateInfo();
+    }
+
+    @Override
     public void onPeerChanged(List<String> peerNames) {
         peerAdpt.clear();
         peerAdpt.addAll(peerNames);
@@ -173,14 +182,31 @@ public class MainActivity extends Activity implements AppEventListener {
 
     @Override
     public void onInfoChanged(HashMap<String, String> infoMap) {
-        String info = "";
+        this.infoMap = infoMap;
+        updateInfo();
+    }
 
-        for(Map.Entry<String, String> e : infoMap.entrySet()) {
-            info += e.getKey() + ": " + e.getValue() + "\n";
+    private void updateInfo() {
 
-            if(e.getKey().equals("Owner address")) hostAddr = e.getValue();
-        }
+        // Might be called on other thread
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                String info = "";
 
-        infoText.setText(info);
+                if(infoMap != null) {
+                    for(Map.Entry<String, String> e : infoMap.entrySet()) {
+                        info += e.getKey() + ": " + e.getValue() + "\n";
+
+                        if(e.getKey().equals("Owner address")) hostAddr = e.getValue();
+                    }
+                }
+
+                if(connStat != null)
+                    info += connStat + "\n";
+
+                infoText.setText(info);
+            }
+        });
     }
 }

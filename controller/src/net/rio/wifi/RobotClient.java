@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.rio.controller.MainActivity;
+import net.rio.controller.AppEventListener;
 
 public class RobotClient implements Runnable {
 
@@ -24,6 +25,12 @@ public class RobotClient implements Runnable {
 
     private Socket socket;
     private DataOutputStream oStream;
+
+    private AppEventListener eventListener;
+
+    public RobotClient(AppEventListener eventListener) {
+        this.eventListener = eventListener;
+    }
 
     @Override
     public void run() {
@@ -38,6 +45,8 @@ public class RobotClient implements Runnable {
             socket.connect(new InetSocketAddress(host, port), 500);
 
             Log.i(MainActivity.TAG, "Connected");
+            if(eventListener != null)
+                eventListener.onConnectionChanged("Connected");
 
             oStream = new DataOutputStream(socket.getOutputStream());
 
@@ -69,6 +78,8 @@ public class RobotClient implements Runnable {
                     Log.e(MainActivity.TAG, e.getMessage());
                 }
                 Log.i(MainActivity.TAG, "Disconnected");
+                if(eventListener != null)
+                    eventListener.onConnectionChanged("Not connected");
             }
         }
     }
