@@ -1,3 +1,8 @@
+/*
+ * Arthur: Rio
+ * Date: 2017/02/24
+ */
+
 #include <Arduino.h>
 #include "AFMotor.h"
 
