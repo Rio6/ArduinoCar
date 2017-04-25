@@ -26,7 +26,6 @@ void run() {
     if(parser.index < 0) return;
     if(parser.type == NONE) return;
 
-    Serial.println("Running");
     switch(parser.type) {
         case MOTOR:
             if(parser.index < motorNum) {
