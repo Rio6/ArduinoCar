@@ -24,7 +24,7 @@ public class RobotClient implements Runnable {
     private final int port = 5438;
 
     private Socket socket;
-    private DataOutputStream oStream;
+    private DataOutputStream output;
 
     private AppEventListener eventListener;
 
@@ -40,15 +40,13 @@ public class RobotClient implements Runnable {
         Log.i(MainActivity.TAG, "Connecting to " + host);
 
         try {
-            socket = new Socket();
-            socket.bind(null);
-            socket.connect(new InetSocketAddress(host, port), 500);
+            socket = new Socket(host, port);
 
             Log.i(MainActivity.TAG, "Connected");
             if(eventListener != null)
                 eventListener.onConnectionChanged("Connected");
 
-            oStream = new DataOutputStream(socket.getOutputStream());
+            output = new DataOutputStream(socket.getOutputStream());
 
             while(!Thread.interrupted()) {
                 synchronized(sendLock) {
@@ -59,10 +57,10 @@ public class RobotClient implements Runnable {
                     byte[] cmd = cmdList.remove(0);
 
                     for(byte c : cmd) {
-                        oStream.write(c);
+                        output.write(c);
                     }
                 }
-                oStream.flush();
+                output.flush();
             }
 
         } catch(InterruptedException e) {
@@ -70,16 +68,17 @@ public class RobotClient implements Runnable {
         } catch(IOException e) {
             Log.e(MainActivity.TAG, e.getMessage());
         } finally {
-            if(socket != null) {
-                Log.i(MainActivity.TAG, "Disconnecting");
-                try {
+            try {
+                if(output != null)
+                    output.close();
+                if(socket != null) {
                     socket.close();
-                } catch(IOException e) {
-                    Log.e(MainActivity.TAG, e.getMessage());
+                    Log.i(MainActivity.TAG, "Disconnected");
+                    if(eventListener != null)
+                        eventListener.onConnectionChanged("Not connected");
                 }
-                Log.i(MainActivity.TAG, "Disconnected");
-                if(eventListener != null)
-                    eventListener.onConnectionChanged("Not connected");
+            } catch(IOException e) {
+                Log.e(MainActivity.TAG, e.getMessage());
             }
         }
     }

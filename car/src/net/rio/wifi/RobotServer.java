@@ -18,11 +18,11 @@ public class RobotServer implements Runnable {
 
     private static final int LISTEN_PORT = 5438;
 
-    private ServerSocket server;
+    private Socket client;
     private UsbController usb;
     private AppEventListener eventListener;
 
-    private DataInputStream iStream;
+    private DataInputStream input;
 
     private Thread srvThread;
 
@@ -35,22 +35,21 @@ public class RobotServer implements Runnable {
     public void run() {
         while(!Thread.interrupted()) {
             try(ServerSocket server = new ServerSocket(LISTEN_PORT)) {
-                this.server = server;
                 Log.i(MainActivity.TAG, "Waiting connection");
 
                 if(eventListener != null)
                     eventListener.onClientConnected(null);
 
-                Socket client = server.accept();
+                client = server.accept();
                 Log.i(MainActivity.TAG, "Connection established");
 
                 if(eventListener != null)
                     eventListener.onClientConnected(client.getRemoteSocketAddress().toString());
 
-                iStream = new DataInputStream(client.getInputStream());
+                input = new DataInputStream(client.getInputStream());
 
                 byte[] buff = new byte[1];
-                while(iStream.read(buff) > 0 && !Thread.interrupted()) {
+                while(input.read(buff) > 0 && !Thread.interrupted()) {
                     usb.send(buff);
                 }
 
@@ -59,6 +58,16 @@ public class RobotServer implements Runnable {
                 return;
             } catch (IOException e) {
                 Log.i(MainActivity.TAG, e.getMessage());
+            } finally {
+                try {
+                    if(input != null)
+                        input.close();
+                    if(client != null)
+                        client.close();
+                    eventListener.onClientConnected(null);
+                } catch(IOException e) {
+                    Log.e(MainActivity.TAG, Log.getStackTraceString(e));
+                }
             }
         }
     }
@@ -75,12 +84,10 @@ public class RobotServer implements Runnable {
         Log.i(MainActivity.TAG, "Stopping server");
 
         try {
-            if(iStream != null)
-                iStream.close();
-            if(server != null)
-                server.close();
 
             srvThread.interrupt();
+            if(client != null)
+                client.close();
 
         } catch(IOException e) {
             Log.e(MainActivity.TAG, Log.getStackTraceString(e));
