@@ -1,6 +1,6 @@
 /*
  * Author: Rio
- * Date: 2017/02/21
+ * Date: 2017/12/16
  */
 
 package net.rio.wifi;
@@ -18,6 +18,7 @@ public class RobotServer implements Runnable {
 
     private static final int LISTEN_PORT = 5438;
 
+    private ServerSocket server;
     private Socket client;
     private UsbController usb;
     private AppEventListener eventListener;
@@ -34,7 +35,7 @@ public class RobotServer implements Runnable {
     @Override
     public void run() {
         while(!Thread.interrupted()) {
-            try(ServerSocket server = new ServerSocket(LISTEN_PORT)) {
+            try {
                 Log.i(MainActivity.TAG, "Waiting connection");
 
                 if(eventListener != null)
@@ -75,6 +76,12 @@ public class RobotServer implements Runnable {
     public void startServer() {
         Log.i(MainActivity.TAG, "Starting server");
 
+        try {
+            server = new ServerSocket(LISTEN_PORT);
+        } catch(IOException e) {
+            Log.e(MainActivity.TAG, Log.getStackTraceString(e));
+        }
+
         srvThread = new Thread(this);
         srvThread.start();
     }
@@ -83,12 +90,14 @@ public class RobotServer implements Runnable {
 
         Log.i(MainActivity.TAG, "Stopping server");
 
+        srvThread.interrupt();
+
         try {
-
-            srvThread.interrupt();
-            if(client != null)
+            if(server != null)
+                server.close();
+            if(client != null) {
                 client.close();
-
+            }
         } catch(IOException e) {
             Log.e(MainActivity.TAG, Log.getStackTraceString(e));
         }
