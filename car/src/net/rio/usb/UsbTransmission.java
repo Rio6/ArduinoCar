@@ -8,6 +8,7 @@ package net.rio.usb;
 import android.hardware.usb.*;
 import android.util.Log;
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 
 import net.rio.car.MainActivity;
 
@@ -110,7 +111,7 @@ class UsbTransmission {
     }
 
     void send(byte[] buff) {
-        Log.d(MainActivity.TAG, "Sending: " + buff[0]);
+        Log.d(MainActivity.TAG, "Sending: " + Arrays.toString(buff));
         reqOut.queue(ByteBuffer.wrap(buff), buff.length);
     }
 }

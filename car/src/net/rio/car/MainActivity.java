@@ -117,13 +117,13 @@ public class MainActivity extends Activity implements AppEventListener {
     public void onPause() {
         super.onPause();
         unregisterReceiver(receiver);
+        uController.stopConnection();
         server.stopServer();
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        uController.stopConnection();
     }
 
     @Override
