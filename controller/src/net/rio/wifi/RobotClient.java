@@ -56,8 +56,10 @@ public class RobotClient implements Runnable {
                 while(cmdList.size() > 0) {
                     byte[] cmd = cmdList.remove(0);
 
-                    for(byte c : cmd) {
-                        output.write(c);
+                    if(cmd != null) {
+                        for(byte c : cmd) {
+                            output.write(c);
+                        }
                     }
                 }
                 output.flush();
