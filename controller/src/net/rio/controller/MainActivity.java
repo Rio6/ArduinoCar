@@ -1,6 +1,6 @@
 /*
  * Author: Rio
- * Date: 2017/04/23
+ * Date: 2017/12/16
  */
 
 package net.rio.controller;
@@ -28,6 +28,7 @@ public class MainActivity extends Activity implements AppEventListener {
     private Receiver receiver;
     private WifiP2pController controller;
     private RobotClient robotClient;
+    private RobotMovement robotMovement;
 
     private String hostAddr;
     private String connStat;
@@ -42,6 +43,7 @@ public class MainActivity extends Activity implements AppEventListener {
         controller = new WifiP2pController(this, this);
         receiver = new Receiver(controller);
         robotClient = new RobotClient(this);
+        robotMovement = new RobotMovement(robotClient);
         connStat = "Not connected";
 
         infoText = (TextView) findViewById(R.id.info_text);
@@ -133,6 +135,9 @@ public class MainActivity extends Activity implements AppEventListener {
                 robotClient.send(new byte[]{'>', 'M', 3, (byte) 200, 4, '<'});
             }
         });
+
+        ControlView ctlView = (ControlView) findViewById(R.id.control_view);
+        ctlView.setOnMoveListener(robotMovement);
 
         // Setup adapter
         peerAdpt = new ArrayAdapter(this, android.R.layout.simple_spinner_item);
