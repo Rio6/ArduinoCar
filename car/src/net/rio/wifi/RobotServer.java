@@ -49,7 +49,7 @@ public class RobotServer implements Runnable {
 
                 input = new DataInputStream(client.getInputStream());
 
-                byte[] buff = new byte[1];
+                byte[] buff = new byte[6];
                 while(input.read(buff) > 0 && !Thread.interrupted()) {
                     usb.send(buff);
                 }

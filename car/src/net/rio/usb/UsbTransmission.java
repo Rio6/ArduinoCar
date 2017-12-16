@@ -64,17 +64,17 @@ class UsbTransmission {
         }
 
         // Arduino serial usb converter setup
-        /*
-           connection.controlTransfer(0x21, 34, 0, 0, null, 0, 0);
-           connection.controlTransfer(0x21, 32, 0, 0, new byte[] { (byte) 0x80,
-           0x25, 0x00, 0x00, 0x00, 0x00, 0x08 }, 7, 0); // 9600, 8N1
-           */
+        connection.controlTransfer(0x21, 34, 0, 0, null, 0, 0);
+        connection.controlTransfer(0x21, 32, 0, 0, new byte[] { (byte) 0x80,
+            0x25, 0x00, 0x00, 0x00, 0x00, 0x08 }, 7, 0); // 9600, 8N1
 
         // For Rev. 1
+        /*
         connection.controlTransfer(0x40, 0, 0, 0, null, 0, 0); // reset
         connection.controlTransfer(0x40, 0, 1, 0, null, 0, 0); // clear Rx
         connection.controlTransfer(0x40, 0, 2, 0, null, 0, 0); // clear Tx
         connection.controlTransfer(0x40, 0x03, 0x4138, 0, null, 0, 0); // 9600, 8n1
+        */
 
         for (int i = 0; i < iface.getEndpointCount(); i++) {
             if (iface.getEndpoint(i).getType() == UsbConstants.USB_ENDPOINT_XFER_BULK) {
@@ -111,6 +111,9 @@ class UsbTransmission {
     }
 
     void send(byte[] buff) {
+        if(reqOut == null)
+            return;
+
         Log.d(MainActivity.TAG, "Sending: " + Arrays.toString(buff));
         reqOut.queue(ByteBuffer.wrap(buff), buff.length);
     }
