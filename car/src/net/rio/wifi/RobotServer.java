@@ -75,14 +75,14 @@ public class RobotServer implements Runnable {
     public void startServer() {
         Log.i(MainActivity.TAG, "Starting server");
 
+        srvThread = new Thread(this);
+
         try {
             server = new ServerSocket(LISTEN_PORT);
+            srvThread.start();
         } catch(IOException e) {
             Log.e(MainActivity.TAG, Log.getStackTraceString(e));
         }
-
-        srvThread = new Thread(this);
-        srvThread.start();
     }
 
     public void stopServer() {

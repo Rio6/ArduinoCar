@@ -49,8 +49,7 @@ class UsbTransmission {
         connection = manager.openDevice(device);
 
         if(connection == null) {
-            Log.e(MainActivity.TAG, "Failed to open device");
-            return;
+            throw new RuntimeException("Failed to open device");
         }
 
         int ifaceCnt = device.getInterfaceCount();

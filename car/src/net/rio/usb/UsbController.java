@@ -56,13 +56,21 @@ public class UsbController {
         }
     }
 
-    public void startConnection() {
+    public boolean startConnection() {
         if(device == null || !manager.hasPermission(device)) {
             Log.d(MainActivity.TAG, "Error starting connection");
-            return;
+            return false;
         }
         stopConnection();
-        transmission = new UsbTransmission(manager, device);
+
+        try {
+            transmission = new UsbTransmission(manager, device);
+        } catch(RuntimeException e) {
+            Log.d(MainActivity.TAG, "Error starting connection");
+            return false;
+        }
+
+        return true;
     }
 
     public void stopConnection() {
@@ -74,8 +82,8 @@ public class UsbController {
 
     public void send(byte[] buff) {
         if(transmission == null) {
-            startConnection();
-            return;
+            if(!startConnection())
+                return;
         }
         transmission.send(buff);
     }
