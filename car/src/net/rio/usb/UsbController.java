@@ -58,7 +58,7 @@ public class UsbController {
 
     public boolean startConnection() {
         if(device == null || !manager.hasPermission(device)) {
-            Log.d(MainActivity.TAG, "Error starting connection");
+            Log.d(MainActivity.TAG, "Can't access usb");
             return false;
         }
         stopConnection();
@@ -66,7 +66,7 @@ public class UsbController {
         try {
             transmission = new UsbTransmission(manager, device);
         } catch(RuntimeException e) {
-            Log.d(MainActivity.TAG, "Error starting connection");
+            Log.d(MainActivity.TAG, "Error starting connection: " + e.getMessage());
             return false;
         }
 
