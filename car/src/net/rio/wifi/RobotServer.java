@@ -12,7 +12,6 @@ import java.util.HashMap;
 
 import net.rio.car.MainActivity;
 import net.rio.car.AppEventListener;
-import net.rio.usb.UsbController;
 
 public class RobotServer implements Runnable {
 
@@ -20,15 +19,15 @@ public class RobotServer implements Runnable {
 
     private ServerSocket server;
     private Socket client;
-    private UsbController usb;
+    private OnReceiveListener rcvListener;
     private AppEventListener eventListener;
 
     private DataInputStream input;
 
     private Thread srvThread;
 
-    public RobotServer(UsbController usb, AppEventListener eventListener) {
-        this.usb = usb;
+    public RobotServer(OnReceiveListener rcvListener, AppEventListener eventListener) {
+        this.rcvListener = rcvListener;
         this.eventListener = eventListener;
     }
 
@@ -49,9 +48,9 @@ public class RobotServer implements Runnable {
 
                 input = new DataInputStream(client.getInputStream());
 
-                byte[] buff = new byte[6];
+                byte[] buff = new byte[2];
                 while(input.read(buff) > 0 && !Thread.interrupted()) {
-                    usb.send(buff);
+                    rcvListener.onReceive(buff);
                 }
 
             } catch(BindException e) {
@@ -101,5 +100,10 @@ public class RobotServer implements Runnable {
         } catch(IOException e) {
             Log.e(MainActivity.TAG, Log.getStackTraceString(e));
         }
+    }
+
+
+    public interface OnReceiveListener {
+        public void onReceive(byte[] data);
     }
 }

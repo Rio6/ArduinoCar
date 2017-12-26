@@ -23,6 +23,7 @@ public class MainActivity extends Activity implements AppEventListener {
     private UsbController uController;
     private WifiP2pController wController;
     private Receiver receiver;
+    private RobotMovement movement;
     private RobotServer server;
 
     private ArrayAdapter<String> deviceAdpt;
@@ -43,7 +44,8 @@ public class MainActivity extends Activity implements AppEventListener {
         uController = new UsbController(this);
         wController = new WifiP2pController(this, this);
         receiver = new Receiver(uController, wController);
-        server = new RobotServer(uController, this);
+        movement = new RobotMovement(uController);
+        server = new RobotServer(movement, this);
 
         // Setup textview
         infoText = (TextView) findViewById(R.id.info_text);

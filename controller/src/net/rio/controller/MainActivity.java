@@ -28,7 +28,6 @@ public class MainActivity extends Activity implements AppEventListener {
     private Receiver receiver;
     private WifiP2pController controller;
     private RobotClient robotClient;
-    private RobotMovement robotMovement;
 
     private String hostAddr;
     private String connStat;
@@ -43,7 +42,6 @@ public class MainActivity extends Activity implements AppEventListener {
         controller = new WifiP2pController(this, this);
         receiver = new Receiver(controller);
         robotClient = new RobotClient(this);
-        robotMovement = new RobotMovement(robotClient);
         connStat = "Not connected";
 
         infoText = (TextView) findViewById(R.id.info_text);
@@ -127,17 +125,13 @@ public class MainActivity extends Activity implements AppEventListener {
 
         Button spcBtn = (Button) findViewById(R.id.spc_button);
         spcBtn.setOnClickListener(new View.OnClickListener() {
+        ControlView ctlView = (ControlView) findViewById(R.id.control_view);
+        ctlView.setOnMoveListener(new ControlView.OnMoveListener() {
             @Override
-            public void onClick(View view) {
-                robotClient.send(new byte[]{'>', 'M', 0, (byte) 200, 4, '<'});
-                robotClient.send(new byte[]{'>', 'M', 1, (byte) 200, 4, '<'});
-                robotClient.send(new byte[]{'>', 'M', 2, (byte) 200, 4, '<'});
-                robotClient.send(new byte[]{'>', 'M', 3, (byte) 200, 4, '<'});
+            public void onMove(float x, float y) {
+                robotClient.send(new byte[]{(byte) (x * 128), (byte) (y * 128)});
             }
         });
-
-        ControlView ctlView = (ControlView) findViewById(R.id.control_view);
-        ctlView.setOnMoveListener(robotMovement);
 
         // Setup adapter
         peerAdpt = new ArrayAdapter(this, android.R.layout.simple_spinner_item);
