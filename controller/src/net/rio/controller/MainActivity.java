@@ -79,52 +79,6 @@ public class MainActivity extends Activity implements AppEventListener {
             }
         });
 
-        Button wBtn = (Button) findViewById(R.id.w_button);
-        wBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                robotClient.send(new byte[]{'>', 'M', 0, (byte) 200, 1, '<'});
-                robotClient.send(new byte[]{'>', 'M', 1, (byte) 200, 1, '<'});
-                robotClient.send(new byte[]{'>', 'M', 2, (byte) 200, 1, '<'});
-                robotClient.send(new byte[]{'>', 'M', 3, (byte) 200, 1, '<'});
-            }
-        });
-
-        Button sBtn = (Button) findViewById(R.id.s_button);
-        sBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                robotClient.send(new byte[]{'>', 'M', 0, (byte) 200, 2, '<'});
-                robotClient.send(new byte[]{'>', 'M', 1, (byte) 200, 2, '<'});
-                robotClient.send(new byte[]{'>', 'M', 2, (byte) 200, 2, '<'});
-                robotClient.send(new byte[]{'>', 'M', 3, (byte) 200, 2, '<'});
-            }
-        });
-
-        Button aBtn = (Button) findViewById(R.id.a_button);
-        aBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                robotClient.send(new byte[]{'>', 'M', 0, (byte) 200, 2, '<'});
-                robotClient.send(new byte[]{'>', 'M', 1, (byte) 200, 2, '<'});
-                robotClient.send(new byte[]{'>', 'M', 2, (byte) 200, 1, '<'});
-                robotClient.send(new byte[]{'>', 'M', 3, (byte) 200, 1, '<'});
-            }
-        });
-
-        Button dBtn = (Button) findViewById(R.id.d_button);
-        dBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                robotClient.send(new byte[]{'>', 'M', 0, (byte) 200, 1, '<'});
-                robotClient.send(new byte[]{'>', 'M', 1, (byte) 200, 1, '<'});
-                robotClient.send(new byte[]{'>', 'M', 2, (byte) 200, 2, '<'});
-                robotClient.send(new byte[]{'>', 'M', 3, (byte) 200, 2, '<'});
-            }
-        });
-
-        Button spcBtn = (Button) findViewById(R.id.spc_button);
-        spcBtn.setOnClickListener(new View.OnClickListener() {
         ControlView ctlView = (ControlView) findViewById(R.id.control_view);
         ctlView.setOnMoveListener(new ControlView.OnMoveListener() {
             @Override
