@@ -25,6 +25,7 @@ public class MainActivity extends Activity implements AppEventListener {
     private Receiver receiver;
     private RobotMovement movement;
     private RobotServer server;
+    private CameraView cameraView;
 
     private ArrayAdapter<String> deviceAdpt;
     private Spinner deviceSpnr;
@@ -40,12 +41,13 @@ public class MainActivity extends Activity implements AppEventListener {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
 
-        // Declare variables
+        // Init variables
         uController = new UsbController(this);
         wController = new WifiP2pController(this, this);
         receiver = new Receiver(uController, wController);
         movement = new RobotMovement(uController);
         server = new RobotServer(movement, this);
+        cameraView = (CameraView) findViewById(R.id.camera_view);
 
         // Setup textview
         infoText = (TextView) findViewById(R.id.info_text);
@@ -113,6 +115,7 @@ public class MainActivity extends Activity implements AppEventListener {
         registerReceiver(receiver, receiver.getFilter());
         uController.startConnection();
         server.startServer();
+        cameraView.openCamera();
     }
 
     @Override
@@ -120,6 +123,7 @@ public class MainActivity extends Activity implements AppEventListener {
         super.onPause();
         unregisterReceiver(receiver);
         uController.stopConnection();
+        cameraView.releaseCamera();
         server.stopServer();
     }
 
