@@ -6,7 +6,7 @@
 package net.rio.wifi;
 
 import android.util.Log;
-import java.io.*; // IOException, DataInputStream
+import java.io.*; // IOException, DataInputStream, DataOutputStream
 import java.net.*; // ServerSocket, Socket, BindException
 import java.util.HashMap;
 
@@ -19,15 +19,45 @@ public class RobotServer implements Runnable {
 
     private ServerSocket server;
     private Socket client;
-    private OnReceiveListener rcvListener;
+    private OnReceiveListener recvListener;
     private AppEventListener eventListener;
 
+    private Object sendLock = new Object();
+    private byte[] data;
+
     private DataInputStream input;
+    private DataOutputStream output;
 
     private Thread srvThread;
+    private Thread sendThread;
 
-    public RobotServer(OnReceiveListener rcvListener, AppEventListener eventListener) {
-        this.rcvListener = rcvListener;
+    private Runnable sender = new Runnable() {
+        @Override
+        public void run() {
+            Log.i(MainActivity.TAG, "Starting send thread");
+            try {
+                while(!Thread.interrupted()) {
+                    synchronized(sendLock) {
+                        sendLock.wait();
+                    }
+
+                    if(data.length > 0) {
+                        Log.d(MainActivity.TAG, "L " + data.length);
+                        output.writeInt(data.length);
+//                        output.write(data);
+                        output.flush();
+                    }
+                }
+            } catch(InterruptedException e) {
+            } catch(IOException e) {
+                Log.e(MainActivity.TAG, e.getMessage());
+            }
+            Log.i(MainActivity.TAG, "Send thread stopped");
+        }
+    };
+
+    public RobotServer(OnReceiveListener recvListener, AppEventListener eventListener) {
+        this.recvListener = recvListener;
         this.eventListener = eventListener;
     }
 
@@ -47,10 +77,14 @@ public class RobotServer implements Runnable {
                     eventListener.onClientConnected(client.getRemoteSocketAddress().toString());
 
                 input = new DataInputStream(client.getInputStream());
+                output = new DataOutputStream(client.getOutputStream());
+
+                sendThread = new Thread(sender);
+                sendThread.start();
 
                 byte[] buff = new byte[2];
                 while(input.read(buff) > 0 && !Thread.interrupted()) {
-                    rcvListener.onReceive(buff);
+                    recvListener.onReceive(buff);
                 }
 
             } catch(BindException e) {
@@ -59,11 +93,12 @@ public class RobotServer implements Runnable {
             } catch (IOException e) {
                 Log.i(MainActivity.TAG, e.getMessage());
             } finally {
+                if(sendThread != null) sendThread.interrupt();
                 try {
-                    if(input != null)
-                        input.close();
-                    if(client != null)
-                        client.close();
+                    if(input != null) input.close();
+                    if(output != null) output.close();
+                    if(client != null) client.close();
+
                     eventListener.onClientConnected(null);
                 } catch(IOException e) {
                     Log.e(MainActivity.TAG, Log.getStackTraceString(e));
@@ -75,30 +110,37 @@ public class RobotServer implements Runnable {
     public void startServer() {
         Log.i(MainActivity.TAG, "Starting server");
 
-        srvThread = new Thread(this);
-
         try {
             server = new ServerSocket(LISTEN_PORT);
-            srvThread.start();
         } catch(IOException e) {
-            Log.e(MainActivity.TAG, Log.getStackTraceString(e));
+            Log.w(MainActivity.TAG, Log.getStackTraceString(e));
         }
+
+        srvThread = new Thread(this);
+        srvThread.start();
     }
 
     public void stopServer() {
 
         Log.i(MainActivity.TAG, "Stopping server");
 
-        srvThread.interrupt();
+        if(srvThread != null) {
+            srvThread.interrupt();
+            srvThread = null;
+        }
 
         try {
-            if(server != null)
-                server.close();
-            if(client != null) {
-                client.close();
-            }
+            if(client != null) client.close();
+            if(server != null) server.close();
         } catch(IOException e) {
             Log.e(MainActivity.TAG, Log.getStackTraceString(e));
+        }
+    }
+
+    public void send(byte[] data) {
+        this.data = data;
+        synchronized(sendLock) {
+            sendLock.notify();
         }
     }
 

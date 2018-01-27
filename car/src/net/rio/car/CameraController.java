@@ -1,6 +1,6 @@
 package net.rio.car;
 
-import android.content.Context;
+import android.app.Activity;
 import android.graphics.ImageFormat;
 import android.hardware.Camera;
 import android.util.AttributeSet;
@@ -9,14 +9,17 @@ import android.view.*; // SurfaceView, SurfaceHolder
 
 import java.io.IOException;
 
-public class CameraView extends SurfaceView implements SurfaceHolder.Callback, Camera.PreviewCallback {
+public class CameraController implements SurfaceHolder.Callback, Camera.PreviewCallback {
 
     private Camera camera;
+    private SurfaceView cameraView;
+    private OnCameraDataListener cameraListener;
 
-    public CameraView(Context context, AttributeSet attributes) {
-        super(context, attributes);
+    public CameraController(Activity activity, OnCameraDataListener cameraListener) {
+        this.cameraListener = cameraListener;
 
-        getHolder().addCallback(this);;
+        cameraView = (SurfaceView) activity.findViewById(R.id.camera_view);
+        cameraView.getHolder().addCallback(this);
     }
 
     public void openCamera() {
@@ -71,7 +74,12 @@ public class CameraView extends SurfaceView implements SurfaceHolder.Callback, C
 
     @Override
     public void onPreviewFrame(byte[] data, Camera camera) {
-        Log.d(MainActivity.TAG, "Camera data " + data.length);
+        cameraListener.onCameraData(data);
         camera.addCallbackBuffer(data);
+    }
+
+
+    public interface OnCameraDataListener {
+        public void onCameraData(byte[] data);
     }
 }

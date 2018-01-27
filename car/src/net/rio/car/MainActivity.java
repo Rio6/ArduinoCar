@@ -25,7 +25,7 @@ public class MainActivity extends Activity implements AppEventListener {
     private Receiver receiver;
     private RobotMovement movement;
     private RobotServer server;
-    private CameraView cameraView;
+    private CameraController camera;
 
     private ArrayAdapter<String> deviceAdpt;
     private Spinner deviceSpnr;
@@ -47,7 +47,13 @@ public class MainActivity extends Activity implements AppEventListener {
         receiver = new Receiver(uController, wController);
         movement = new RobotMovement(uController);
         server = new RobotServer(movement, this);
-        cameraView = (CameraView) findViewById(R.id.camera_view);
+        camera = new CameraController(this,
+                new CameraController.OnCameraDataListener() {
+                    @Override
+                    public void onCameraData(byte[] data) {
+                        server.send(data);
+                    }
+                });
 
         // Setup textview
         infoText = (TextView) findViewById(R.id.info_text);
@@ -115,7 +121,7 @@ public class MainActivity extends Activity implements AppEventListener {
         registerReceiver(receiver, receiver.getFilter());
         uController.startConnection();
         server.startServer();
-        cameraView.openCamera();
+        camera.openCamera();
     }
 
     @Override
@@ -123,7 +129,7 @@ public class MainActivity extends Activity implements AppEventListener {
         super.onPause();
         unregisterReceiver(receiver);
         uController.stopConnection();
-        cameraView.releaseCamera();
+        camera.releaseCamera();
         server.stopServer();
     }
 
