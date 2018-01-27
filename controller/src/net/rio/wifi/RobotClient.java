@@ -16,7 +16,6 @@ import net.rio.controller.AppEventListener;
 
 public class RobotClient implements Runnable {
 
-    private Thread sendThread;
     private Object sendLock = new Object();
     private List<byte[]> cmdList = new ArrayList<>();
 
@@ -24,11 +23,45 @@ public class RobotClient implements Runnable {
     private final int port = 5438;
 
     private Socket socket;
+
+    private DataInputStream input;
     private DataOutputStream output;
 
     private AppEventListener eventListener;
+    private OnReceiveListener recvListener;
 
-    public RobotClient(AppEventListener eventListener) {
+    private Thread socketThread;
+    private Thread sendThread;
+
+    private Runnable sender = new Runnable() {
+        @Override
+        public void run() {
+            Log.i(MainActivity.TAG, "Starting send thread");
+            try {
+                while(!Thread.interrupted()) {
+                    synchronized(sendLock) {
+                        sendLock.wait();
+                    }
+
+                    while(cmdList.size() > 0) {
+                        byte[] cmd = cmdList.remove(0);
+
+                        if(cmd != null) {
+                            output.write(cmd);
+                        }
+                    }
+                    output.flush();
+                }
+            } catch(InterruptedException e) {
+            } catch (IOException e) {
+                Log.e(MainActivity.TAG, e.getMessage());
+            }
+            Log.i(MainActivity.TAG, "Send thread stopped");
+        }
+    };
+
+    public RobotClient(OnReceiveListener recvListener, AppEventListener eventListener) {
+        this.recvListener = recvListener;
         this.eventListener = eventListener;
     }
 
@@ -46,31 +79,29 @@ public class RobotClient implements Runnable {
             if(eventListener != null)
                 eventListener.onConnectionChanged("Connected");
 
+            input = new DataInputStream(socket.getInputStream());
             output = new DataOutputStream(socket.getOutputStream());
 
+            sendThread = new Thread(sender);
+            sendThread.start();
+
             while(!Thread.interrupted()) {
-                synchronized(sendLock) {
-                    sendLock.wait();
-                }
+                int length = input.readInt();
+                Log.d(MainActivity.TAG, "L " + length);
+//                byte[] buff = new byte[length];
 
-                while(cmdList.size() > 0) {
-                    byte[] cmd = cmdList.remove(0);
+//                int read = input.read(buff);
+//                if(read < 0) break;
 
-                    if(cmd != null) {
-                        output.write(cmd);
-                    }
-                }
-                output.flush();
+//                recvListener.onReceive(buff);
             }
-
-        } catch(InterruptedException e) {
-            Log.i(MainActivity.TAG, "Send thread interrupted");
         } catch(IOException e) {
             Log.e(MainActivity.TAG, e.getMessage());
         } finally {
+            sendThread.interrupt();
             try {
-                if(output != null)
-                    output.close();
+                if(input != null) input.close();
+                if(output != null) output.close();
                 if(socket != null) {
                     socket.close();
                     Log.i(MainActivity.TAG, "Disconnected");
@@ -78,7 +109,7 @@ public class RobotClient implements Runnable {
                         eventListener.onConnectionChanged("Not connected");
                 }
             } catch(IOException e) {
-                Log.e(MainActivity.TAG, e.getMessage());
+                Log.e(MainActivity.TAG, Log.getStackTraceString(e));
             }
         }
     }
@@ -91,8 +122,16 @@ public class RobotClient implements Runnable {
     }
 
     public void disconnect() {
-        if(sendThread != null)
-            sendThread.interrupt();
+        try {
+            if(input != null) input.close();
+        } catch(IOException e) {
+            Log.e(MainActivity.TAG, Log.getStackTraceString(e));
+        }
+
+        if(socketThread != null) {
+            socketThread.interrupt();
+            socketThread = null;
+        }
     }
 
     public void send(byte[] cmd) {
@@ -100,5 +139,10 @@ public class RobotClient implements Runnable {
         synchronized(sendLock) {
             sendLock.notify();
         }
+    }
+
+
+    public interface OnReceiveListener {
+        public void onReceive(byte[] data);
     }
 }

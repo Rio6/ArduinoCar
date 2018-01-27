@@ -41,7 +41,11 @@ public class MainActivity extends Activity implements AppEventListener {
 
         controller = new WifiP2pController(this, this);
         receiver = new Receiver(controller);
-        robotClient = new RobotClient(this);
+        robotClient = new RobotClient(new RobotClient.OnReceiveListener() {
+            public void onReceive(byte[] data) {
+                android.util.Log.d(MainActivity.TAG, "Got " + data.length);
+            }
+        }, this);
         connStat = "Not connected";
 
         infoText = (TextView) findViewById(R.id.info_text);
@@ -119,6 +123,7 @@ public class MainActivity extends Activity implements AppEventListener {
     public void onStop() {
         super.onStop();
         unregisterReceiver(receiver);
+        robotClient.disconnect();
     }
 
     @Override
