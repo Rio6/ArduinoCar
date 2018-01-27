@@ -40,7 +40,7 @@ public class WifiP2pController implements PeerListListener, ConnectionInfoListen
         manager.discoverPeers(channel, new ActionListener() {
             @Override
             public void onSuccess() {
-                Log.d(MainActivity.TAG, "Discovering");
+                Log.v(MainActivity.TAG, "Discovering");
             }
             @Override
             public void onFailure(int err) {
