@@ -85,15 +85,26 @@ public class RobotClient implements Runnable {
             sendThread = new Thread(sender);
             sendThread.start();
 
+recvLoop:
             while(!Thread.interrupted()) {
                 int length = input.readInt();
-                Log.d(MainActivity.TAG, "L " + length);
-//                byte[] buff = new byte[length];
 
-//                int read = input.read(buff);
-//                if(read < 0) break;
+                byte[] rst = new byte[length];
+                byte[] buff = new byte[512];
 
-//                recvListener.onReceive(buff);
+                int read = 0;
+                while(read < length) {
+                    int toRead = length - read > 512 ? 512 : length - read;
+
+                    int r = input.read(buff, 0, toRead);
+                    if(r < 0) break recvLoop;
+
+                    System.arraycopy(buff, 0, rst, read, r);
+
+                    read += r;
+                }
+
+                recvListener.onReceive(rst);
             }
         } catch(IOException e) {
             Log.e(MainActivity.TAG, e.getMessage());

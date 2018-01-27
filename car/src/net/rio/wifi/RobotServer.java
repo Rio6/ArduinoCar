@@ -42,9 +42,8 @@ public class RobotServer implements Runnable {
                     }
 
                     if(data.length > 0) {
-                        Log.d(MainActivity.TAG, "L " + data.length);
                         output.writeInt(data.length);
-//                        output.write(data);
+                        output.write(data);
                         output.flush();
                     }
                 }
