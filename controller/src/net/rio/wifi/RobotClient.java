@@ -128,8 +128,8 @@ recvLoop:
     public void connect(String host) {
         disconnect();
         this.host = host;
-        sendThread = new Thread(this);
-        sendThread.start();
+        socketThread = new Thread(this);
+        socketThread.start();
     }
 
     public void disconnect() {
