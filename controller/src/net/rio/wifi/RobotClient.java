@@ -109,7 +109,7 @@ recvLoop:
         } catch(IOException e) {
             Log.i(MainActivity.TAG, "Receiving interrupted: " + e.getMessage());
         } finally {
-            sendThread.interrupt();
+            if(sendThread != null) sendThread.interrupt();
             try {
                 if(input != null) input.close();
                 if(output != null) output.close();

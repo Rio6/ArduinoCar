@@ -9,10 +9,11 @@ import net.rio.wifi.RobotClient;
 import net.rio.wifi.WifiP2pController;
 
 import android.app.Activity;
-import android.content.IntentFilter;
+import android.content.*; // Intent, IntentFilter, SharedPreferences
 import android.net.wifi.p2p.WifiP2pManager;
 import android.os.Bundle;
-import android.view.View;
+import android.preference.PreferenceManager;
+import android.view.*; // Menu, MenuItem, View
 import android.widget.*; // Button, Spinner, TextView
 
 import java.util.*; // List, Map, HashMap
@@ -22,6 +23,7 @@ public class MainActivity extends Activity implements AppEventListener {
     public static String TAG = "RobotControl";
 
     private ArrayAdapter<String> peerAdpt;
+    private ControlView ctlView;
     private TextView infoText;
     private Spinner peerSpnr;
 
@@ -32,6 +34,7 @@ public class MainActivity extends Activity implements AppEventListener {
     private String hostAddr;
     private String connStat;
     private HashMap<String, String> infoMap;
+    private SharedPreferences pref;
 
     /** Called when the activity is first created. */
     @Override
@@ -42,7 +45,7 @@ public class MainActivity extends Activity implements AppEventListener {
         controller = new WifiP2pController(this, this);
         receiver = new Receiver(controller);
 
-        ControlView ctlView = (ControlView) findViewById(R.id.control_view);
+        ctlView = (ControlView) findViewById(R.id.control_view);
         ctlView.setOnMoveListener(new ControlView.OnMoveListener() {
             @Override
             public void onMove(float x, float y) {
@@ -52,8 +55,8 @@ public class MainActivity extends Activity implements AppEventListener {
 
         robotClient = new RobotClient(ctlView, this);
 
+        pref = PreferenceManager.getDefaultSharedPreferences(this);
         connStat = "Not connected";
-
         infoText = (TextView) findViewById(R.id.info_text);
 
         // Setup button
@@ -112,22 +115,44 @@ public class MainActivity extends Activity implements AppEventListener {
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
+    public void onResume() {
+        super.onResume();
         registerReceiver(receiver, receiver.getFilter());
+
+        if(!pref.getBoolean("p2p_server", true)) {
+            hostAddr = pref.getString("host_ip", "127.0.0.1");
+        }
+
+        ctlView.setCameraAngle(Integer.valueOf(pref.getString("camera_angle", "0")));
     }
 
     @Override
-    public void onStop() {
-        super.onStop();
+    public void onPause() {
+        super.onPause();
         unregisterReceiver(receiver);
         robotClient.disconnect();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        startActivity(new Intent(this, SettingsActivity.class));
+        return true;
     }
 
     @Override
     public void onConnectionChanged(String status) {
         connStat = status;
         updateInfo();
+
+        if(connStat.equals("Not connected")) {
+            ctlView.clearImage();
+        }
     }
 
     @Override
@@ -154,7 +179,13 @@ public class MainActivity extends Activity implements AppEventListener {
                     for(Map.Entry<String, String> e : infoMap.entrySet()) {
                         info += e.getKey() + ": " + e.getValue() + "\n";
 
-                        if(e.getKey().equals("Owner address")) hostAddr = e.getValue();
+                        if(e.getKey().equals("Owner address")) {
+                            if(pref.getBoolean("p2p_server", true)) {
+                                hostAddr = e.getValue();
+                            } else {
+                                e.setValue(pref.getString("host_ip", "127.0.0.1"));
+                            }
+                        }
                     }
                 }
 

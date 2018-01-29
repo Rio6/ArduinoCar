@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <ListPreference
+        android:defaultValue="0"
+        android:entries="@array/camera_angles"
+        android:entryValues="@array/camera_angles"
+        android:key="camera_angle"
+        android:title="Camera angle" />
+    <CheckBoxPreference
+        android:defaultValue="true"
+        android:disableDependentsState="true"
+        android:key="p2p_server"
+        android:title="Connect through wifi direct" />
+    <EditTextPreference
+        android:defaultValue="127.0.0.1"
+        android:dependency="p2p_server"
+        android:key="host_ip"
+        android:title="Host IP Address" />
+
+</PreferenceScreen>
