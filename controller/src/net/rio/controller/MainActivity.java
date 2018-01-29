@@ -92,7 +92,7 @@ public class MainActivity extends Activity implements AppEventListener {
         });
 
         // Setup adapter
-        peerAdpt = new ArrayAdapter(this, android.R.layout.simple_spinner_item);
+        peerAdpt = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item);
         peerAdpt.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         peerAdpt.setNotifyOnChange(true);
 

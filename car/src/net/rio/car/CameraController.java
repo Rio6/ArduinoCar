@@ -9,6 +9,7 @@ import android.view.*; // SurfaceView, SurfaceHolder
 
 import java.io.IOException;
 
+@SuppressWarnings("deprecation") // Camera is deprecated after API 23
 public class CameraController implements SurfaceHolder.Callback, Camera.PreviewCallback {
 
     private Camera camera;

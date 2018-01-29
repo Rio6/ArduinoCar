@@ -59,7 +59,7 @@ public class MainActivity extends Activity implements AppEventListener {
         infoText = (TextView) findViewById(R.id.info_text);
 
         // Setup adapter
-        deviceAdpt = new ArrayAdapter(this, android.R.layout.simple_spinner_item);
+        deviceAdpt = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item);
         deviceAdpt.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         deviceAdpt.setNotifyOnChange(true);
 
