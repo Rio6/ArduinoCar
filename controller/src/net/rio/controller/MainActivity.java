@@ -41,11 +41,17 @@ public class MainActivity extends Activity implements AppEventListener {
 
         controller = new WifiP2pController(this, this);
         receiver = new Receiver(controller);
-        robotClient = new RobotClient(new RobotClient.OnReceiveListener() {
-            public void onReceive(byte[] data) {
-                android.util.Log.d(MainActivity.TAG, "Got " + data.length);
+
+        ControlView ctlView = (ControlView) findViewById(R.id.control_view);
+        ctlView.setOnMoveListener(new ControlView.OnMoveListener() {
+            @Override
+            public void onMove(float x, float y) {
+                robotClient.send(new byte[]{(byte) (x * 128), (byte) (y * 128)});
             }
-        }, this);
+        });
+
+        robotClient = new RobotClient(ctlView, this);
+
         connStat = "Not connected";
 
         infoText = (TextView) findViewById(R.id.info_text);
@@ -80,14 +86,6 @@ public class MainActivity extends Activity implements AppEventListener {
             @Override
             public void onClick(View view) {
                 robotClient.disconnect();
-            }
-        });
-
-        ControlView ctlView = (ControlView) findViewById(R.id.control_view);
-        ctlView.setOnMoveListener(new ControlView.OnMoveListener() {
-            @Override
-            public void onMove(float x, float y) {
-                robotClient.send(new byte[]{(byte) (x * 128), (byte) (y * 128)});
             }
         });
 
