@@ -107,7 +107,7 @@ recvLoop:
                 recvListener.onReceive(rst);
             }
         } catch(IOException e) {
-            Log.e(MainActivity.TAG, e.getMessage());
+            Log.i(MainActivity.TAG, "Receiving interrupted: " + e.getMessage());
         } finally {
             sendThread.interrupt();
             try {
